@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Thai Tutor">
+<meta name="theme-color" content="#ffffff">
+<title>Thai Tutor Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=Noto+Serif+Thai:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f5f2;
+    --surface: #ffffff;
+    --surface2: #f0ede8;
+    --border: rgba(0,0,0,0.08);
+    --border-strong: rgba(0,0,0,0.15);
+    --text: #1a1816;
+    --text2: #6b6560;
+    --text3: #a09890;
+    --accent: #c0392b;
+    --accent-light: #fdf0ee;
+    --green: #1a6b4a;
+    --green-light: #eaf5f0;
+    --blue: #1a4a8a;
+    --blue-light: #eef2fb;
+    --amber: #8a5a0a;
+    --amber-light: #fdf6e8;
+    --red: #c0392b;
+    --red-light: #fdf0ee;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+    --font: 'Sarabun', sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161412;
+      --surface: #201e1b;
+      --surface2: #2a2724;
+      --border: rgba(255,255,255,0.07);
+      --border-strong: rgba(255,255,255,0.13);
+      --text: #f0ece6;
+      --text2: #9a9088;
+      --text3: #5a5250;
+      --accent: #e05444;
+      --accent-light: #2a1a18;
+      --green: #3db87a;
+      --green-light: #122b1e;
+      --blue: #5b8fdf;
+      --blue-light: #111d30;
+      --amber: #d4a030;
+      --amber-light: #251c08;
+      --red: #e05444;
+      --red-light: #2a1a18;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--bg); font-family: var(--font); color: var(--text); }
+  body { display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; min-height: 100vh; position: relative; }
+  .app-header { padding: 52px 20px 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .app-header h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; color: var(--text); }
+  .app-header .sub { font-size: 13px; color: var(--text2); margin-top: 1px; font-family: 'Noto Serif Thai', serif; }
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 14px 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .stat { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 8px; text-align: center; }
+  .stat-val { font-size: 18px; font-weight: 600; color: var(--text); }
+  .stat-val.g { color: var(--green); }
+  .stat-val.b { color: var(--blue); }
+  .stat-val.a { color: var(--amber); }
+  .stat-lbl { font-size: 10px; color: var(--text3); margin-top: 2px; line-height: 1.3; }
+  .tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .tab { flex: 1; padding: 12px 4px; font-size: 13px; font-weight: 500; color: var(--text2); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; font-family: var(--font); transition: color 0.15s; }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .content { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 100px; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .cal-nav button { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); width: 36px; height: 36px; font-size: 16px; cursor: pointer; color: var(--text); display: flex; align-items: center; justify-content: center; }
+  .cal-month { font-size: 16px; font-weight: 600; color: var(--text); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .cal-hdr { text-align: center; font-size: 11px; font-weight: 600; color: var(--text3); padding: 4px 0; }
+  .cal-cell { min-height: 54px; border-radius: 10px; padding: 5px 4px; cursor: pointer; background: var(--surface); border: 1px solid var(--border); transition: background 0.1s; }
+  .cal-cell:active { background: var(--surface2); }
+  .cal-cell.other { opacity: 0.3; }
+  .cal-cell.today { border-color: var(--accent); }
+  .cal-num { font-size: 11px; font-weight: 500; color: var(--text2); text-align: center; }
+  .cal-cell.today .cal-num { color: var(--accent); font-weight: 700; }
+  .cal-dots { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 3px; justify-content: center; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; }
+  .dot.completed { background: var(--green); }
+  .dot.scheduled { background: var(--blue); }
+  .dot.cancelled { background: var(--red); }
+  .legend { display: flex; gap: 12px; margin-top: 12px; padding: 10px 12px; background: var(--surface); border-radius: var(--radius-sm); }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow); }
+  .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .card-date { font-size: 14px; font-weight: 600; color: var(--text); }
+  .card-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .icon-btn { background: var(--surface2); border: none; border-radius: var(--radius-sm); padding: 5px 10px; font-size: 12px; color: var(--text2); cursor: pointer; font-family: var(--font); }
+  .icon-btn.danger { color: var(--red); }
+  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 99px; margin-top: 8px; }
+  .badge.completed { background: var(--green-light); color: var(--green); }
+  .badge.scheduled { background: var(--blue-light); color: var(--blue); }
+  .badge.cancelled { background: var(--red-light); color: var(--red); }
+  .badge.paid { background: var(--green-light); color: var(--green); }
+  .badge.pending { background: var(--amber-light); color: var(--amber); }
+  .notes-chip { font-size: 12px; color: var(--text2); margin-top: 6px; padding: 6px 10px; background: var(--surface2); border-radius: var(--radius-sm); line-height: 1.4; }
+  .sec-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .sec-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .fab { position: fixed; bottom: 28px; right: 20px; width: 54px; height: 54px; border-radius: 50%; background: var(--accent); color: #fff; border: none; font-size: 26px; cursor: pointer; box-shadow: 0 4px 16px rgba(192,57,43,0.35); display: flex; align-items: center; justify-content: center; z-index: 50; transition: transform 0.1s; }
+  .fab:active { transform: scale(0.94); }
+  .empty { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 14px; }
+  .empty .emoji { font-size: 36px; margin-bottom: 10px; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; display: flex; align-items: flex-end; justify-content: center; }
+  .modal-overlay.hidden { display: none; }
+  .modal { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; padding: 20px 20px 40px; max-height: 90vh; overflow-y: auto; }
+  .modal-handle { width: 36px; height: 4px; background: var(--border-strong); border-radius: 2px; margin: 0 auto 16px; }
+  .modal h2 { font-size: 17px; font-weight: 600; margin-bottom: 18px; color: var(--text); }
+  .form-row { margin-bottom: 14px; }
+  .form-row label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .form-row input, .form-row select, .form-row textarea { width: 100%; padding: 11px 13px; font-size: 15px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface2); color: var(--text); font-family: var(--font); outline: none; -webkit-appearance: none; appearance: none; }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color: var(--accent); }
+  .form-row textarea { height: 72px; resize: none; }
+  .btn-row { display: flex; gap: 10px; margin-top: 20px; }
+  .btn-save { flex: 1; padding: 13px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; cursor: pointer; font-family: var(--font); }
+  .btn-cancel { flex: 1; padding: 13px; background: var(--surface2); color: var(--text2); border: none; border-radius: var(--radius-sm); font-size: 15px; cursor: pointer; font-family: var(--font); }
+  .pay-amount { font-size: 18px; font-weight: 700; color: var(--text); }
+  .pkg-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 12px; box-shadow: var(--shadow); }
+  .pkg-card-title { font-size: 13px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+  .pkg-big { font-size: 36px; font-weight: 700; color: var(--text); line-height: 1; }
+  .pkg-big span { font-size: 16px; font-weight: 400; color: var(--text2); }
+  .pkg-sub { font-size: 13px; color: var(--text2); margin-top: 4px; margin-bottom: 16px; }
+  .progress-bar-bg { height: 10px; background: var(--surface2); border-radius: 99px; overflow: hidden; margin-bottom: 6px; }
+  .progress-bar-fill { height: 100%; border-radius: 99px; transition: width 0.4s ease; background: var(--green); }
+  .progress-bar-fill.warn { background: var(--amber); }
+  .progress-bar-fill.danger { background: var(--red); }
+  .progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); margin-bottom: 16px; }
+  .pkg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .pkg-stat { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px; }
+  .pkg-stat-val { font-size: 20px; font-weight: 700; color: var(--text); }
+  .pkg-stat-lbl { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .pkg-alert { padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; margin-bottom: 12px; }
+  .pkg-alert.safe { background: var(--green-light); color: var(--green); }
+  .pkg-alert.warn { background: var(--amber-light); color: var(--amber); }
+  .pkg-alert.danger { background: var(--red-light); color: var(--red); }
+  .pkg-settings { border-top: 1px solid var(--border); padding-top: 14px; margin-top: 4px; }
+  .pkg-settings-title { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 10px; }
+  .btn-sm { padding: 11px 16px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--font); white-space: nowrap; }
+  .history-list { margin-top: 4px; }
+  .history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .history-item:last-child { border-bottom: none; }
+  .history-item .h-date { color: var(--text2); }
+  .history-item .h-hours { font-weight: 600; color: var(--text); }
+  .history-item .h-del { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; padding: 0 4px; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>Thai Tutor Tracker</h1>
+  <div class="sub">ติดตามคลาสภาษาไทยของฉัน</div>
+</div>
+
+<div class="stats-row" id="stats-row"></div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('calendar')">📅 Cal</button>
+  <button class="tab" onclick="switchTab('classes')">📚 Classes</button>
+  <button class="tab" onclick="switchTab('payments')">💰 Pay</button>
+  <button class="tab" onclick="switchTab('package')">⏱ Package</button>
+</div>
+
+<div class="content">
+  <div id="sec-calendar" class="section active">
+    <div class="cal-nav">
+      <button onclick="changeMonth(-1)">‹</button>
+      <span class="cal-month" id="cal-month"></span>
+      <button onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="legend">
+      <div class="legend-item"><span class="dot scheduled"></span>Scheduled</div>
+      <div class="legend-item"><span class="dot completed"></span>Completed</div>
+      <div class="legend-item"><span class="dot cancelled"></span>Cancelled</div>
+    </div>
+  </div>
+
+  <div id="sec-classes" class="section">
+    <div class="sec-header"><span class="sec-title">All classes</span></div>
+    <div id="class-list"></div>
+  </div>
+
+  <div id="sec-payments" class="section">
+    <div class="sec-header"><span class="sec-title">Payments</span></div>
+    <div id="payment-list"></div>
+  </div>
+
+  <div id="sec-package" class="section">
+    <div id="pkg-content"></div>
+  </div>
+</div>
+
+<button class="fab" onclick="fabClick()">+</button>
+
+<div class="modal-overlay hidden" id="modal-class">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2 id="modal-class-title">Add class</h2>
+    <div class="form-row"><label>Date</label><input type="date" id="cl-date"></div>
+    <div class="form-row"><label>Time</label><input type="time" id="cl-time" value="10:00"></div>
+    <div class="form-row"><label>Duration (minutes)</label><input type="number" id="cl-duration" value="60" min="15" step="15"></div>
+    <div class="form-row"><label>Topic / lesson</label><input type="text" id="cl-topic" placeholder="e.g. Tones, reading practice…"></div>
+    <div class="form-row"><label>Status</label>
+      <select id="cl-status">
+        <option value="scheduled">Scheduled</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+    <div class="form-row"><label>Notes</label><textarea id="cl-notes" placeholder="Homework, vocab, things to review…"></textarea></div>
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="closeModals()">Cancel</button>
+      <button class="btn-save" onclick="saveClass()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modal-payment">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>Add payment</h2>
+    <div class="form-row"><label>Date</label><input type="date" id="pay-date"></div>
+    <div class="form-row"><label>Amount (฿)</label><input type="number" id="pay-amount" placeholder="e.g. 800"></div>
+    <div class="form-row"><label>Description</label><input type="text" id="pay-desc" placeholder="e.g. 4 classes — March"></div>
+    <div class="form-row"><label>Status</label>
+      <select id="pay-status">
+        <option value="paid">Paid</option>
+        <option value="pending">Pending</option>
+      </select>
+    </div>
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="closeModals()">Cancel</button>
+      <button class="btn-save" onclick="savePayment()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'thai_tutor_v1';
+let state = { classes: [], payments: [] };
+let viewYear, viewMonth, editClassIdx = null, currentTab = 'calendar';
+const now = new Date();
+viewYear = now.getFullYear();
+viewMonth = now.getMonth();
+
+function today() { return now.toISOString().slice(0,10); }
+
+function loadState() {
+  try { const r = localStorage.getItem(STORAGE_KEY); if (r) state = JSON.parse(r); } catch(e) {}
+  if (!state.package) state.package = { totalHours: 20, costPerPackage: 9000, startDate: today(), manualEntries: [] };
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['calendar','classes','payments','package'][i] === tab));
+  ['calendar','classes','payments','package'].forEach(s => document.getElementById('sec-'+s).classList.toggle('active', s===tab));
+}
+
+function fabClick() {
+  if (currentTab === 'payments') openAddPayment(); else openAddClass(today());
+}
+
+function changeMonth(d) {
+  viewMonth += d;
+  if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+  if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+  renderCalendar();
+}
+
+function renderStats() {
+  const completed = state.classes.filter(c => c.status==='completed').length;
+  const upcoming = state.classes.filter(c => c.status==='scheduled' && c.date >= today()).length;
+  const totalPaid = state.payments.filter(p => p.status==='paid').reduce((a,b) => a+Number(b.amount), 0);
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat"><div class="stat-val">${state.classes.length}</div><div class="stat-lbl">Total</div></div>
+    <div class="stat"><div class="stat-val g">${completed}</div><div class="stat-lbl">Done</div></div>
+    <div class="stat"><div class="stat-val b">${upcoming}</div><div class="stat-lbl">Upcoming</div></div>
+    <div class="stat"><div class="stat-val a">฿${totalPaid.toLocaleString()}</div><div class="stat-lbl">Paid</div></div>`;
+}
+
+function renderCalendar() {
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month').textContent = months[viewMonth] + ' ' + viewYear;
+  const days = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  let html = days.map(d => `<div class="cal-hdr">${d}</div>`).join('');
+  const first = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
+  const daysInPrev = new Date(viewYear, viewMonth, 0).getDate();
+  const todayStr = today();
+  for (let i=0; i<first; i++) html += `<div class="cal-cell other"><span class="cal-num">${daysInPrev-first+1+i}</span></div>`;
+  for (let d=1; d<=daysInMonth; d++) {
+    const ds = `${viewYear}-${String(viewMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dots = state.classes.filter(c => c.date===ds).slice(0,3).map(c => `<span class="dot ${c.status}"></span>`).join('');
+    html += `<div class="cal-cell${ds===todayStr?' today':''}" onclick="calClick('${ds}')"><div class="cal-num">${d}</div><div class="cal-dots">${dots}</div></div>`;
+  }
+  const used = first+daysInMonth, rem = used%7===0?0:7-(used%7);
+  for (let i=1; i<=rem; i++) html += `<div class="cal-cell other"><span class="cal-num">${i}</span></div>`;
+  document.getElementById('cal-grid').innerHTML = html;
+}
+
+function calClick(ds) { openAddClass(ds); }
+
+function renderClasses() {
+  const sorted = [...state.classes].map((c,i)=>({...c,_i:i})).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+  const el = document.getElementById('class-list');
+  if (!sorted.length) { el.innerHTML = '<div class="empty"><div class="emoji">📚</div>No classes yet.<br>Tap + to add your first class!</div>'; return; }
+  el.innerHTML = sorted.map(c => {
+    const dl = new Date(c.date+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+    const meta = [c.time, c.duration?c.duration+'min':null].filter(Boolean).join(' · ');
+    return `<div class="card"><div class="card-header"><div><div class="card-date">${dl}</div><div class="card-meta">${meta}${c.topic?' · '+c.topic:''}</div></div><div class="card-actions"><button class="icon-btn" onclick="editClass(${c._i})">Edit</button><button class="icon-btn danger" onclick="deleteClass(${c._i})">Del</button></div></div><span class="badge ${c.status}">${c.status.charAt(0).toUpperCase()+c.status.slice(1)}</span>${c.notes?`<div class="notes-chip">${c.notes}</div>`:''}</div>`;
+  }).join('');
+}
+
+function renderPayments() {
+  const sorted = [...state.payments].map((p,i)=>({...p,_i:i})).sort((a,b)=>b.date.localeCompare(a.date));
+  const el = document.getElementById('payment-list');
+  if (!sorted.length) { el.innerHTML = '<div class="empty"><div class="emoji">💰</div>No payments yet.<br>Tap + to record a payment!</div>'; return; }
+  el.innerHTML = sorted.map(p => {
+    const dl = new Date(p.date+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    return `<div class="card"><div class="card-header"><div><div class="pay-amount">฿${Number(p.amount).toLocaleString()}</div><div class="card-meta">${dl}${p.desc?' · '+p.desc:''}</div></div><div class="card-actions"><button class="icon-btn danger" onclick="deletePayment(${p._i})">Del</button></div></div><span class="badge ${p.status}">${p.status.charAt(0).toUpperCase()+p.status.slice(1)}</span></div>`;
+  }).join('');
+}
+
+function getPackageUsedHours() {
+  const fromClasses = state.classes.filter(c => c.status==='completed' && c.date>=(state.package.startDate||'')).reduce((s,c) => s+(Number(c.duration)||60)/60, 0);
+  const fromManual = (state.package.manualEntries||[]).reduce((s,e) => s+Number(e.hours), 0);
+  return fromClasses + fromManual;
+}
+
+function renderPackage() {
+  const pkg = state.package;
+  const totalHours = Number(pkg.totalHours)||20;
+  const cost = Number(pkg.costPerPackage)||9000;
+  const usedHours = getPackageUsedHours();
+  const remainHours = Math.max(0, totalHours-usedHours);
+  const pct = Math.min(100, (usedHours/totalHours)*100);
+  const costPerHour = (cost/totalHours).toFixed(0);
+  const hoursLeft = remainHours.toFixed(1);
+  const hoursUsed = usedHours.toFixed(1);
+  let fillClass = 'progress-bar-fill', alertClass = 'pkg-alert safe', alertMsg = `You're doing great! ${hoursLeft} hours remaining in this package.`;
+  if (pct>=90) { fillClass+=' danger'; alertClass='pkg-alert danger'; alertMsg=`Almost out! Only ${hoursLeft} hours left — time to pay for a new package.`; }
+  else if (pct>=70) { fillClass+=' warn'; alertClass='pkg-alert warn'; alertMsg=`Getting close! ${hoursLeft} hours left — consider arranging payment soon.`; }
+  const manualRows = (pkg.manualEntries||[]).map((e,i) => `<div class="history-item"><span class="h-date">${e.date} — ${e.label||'Manual entry'}</span><span style="display:flex;align-items:center;gap:8px;"><span class="h-hours">${Number(e.hours).toFixed(1)}h</span><button class="h-del" onclick="deleteManualEntry(${i})">×</button></span></div>`).join('');
+  document.getElementById('pkg-content').innerHTML = `
+    <div class="pkg-card">
+      <div class="pkg-card-title">Current package</div>
+      <div class="pkg-big">${hoursUsed}<span> / ${totalHours} hrs used</span></div>
+      <div class="pkg-sub">฿${Number(cost).toLocaleString()} package · ฿${costPerHour}/hr</div>
+      <div class="progress-bar-bg"><div class="${fillClass}" style="width:${pct.toFixed(1)}%"></div></div>
+      <div class="progress-labels"><span>0 hrs</span><span>${totalHours} hrs</span></div>
+      <div class="${alertClass}">${alertMsg}</div>
+      <div class="pkg-grid">
+        <div class="pkg-stat"><div class="pkg-stat-val">${hoursUsed}h</div><div class="pkg-stat-lbl">Hours used</div></div>
+        <div class="pkg-stat"><div class="pkg-stat-val">${hoursLeft}h</div><div class="pkg-stat-lbl">Hours left</div></div>
+        <div class="pkg-stat"><div class="pkg-stat-val">฿${(usedHours*Number(costPerHour)).toLocaleString(undefined,{maximumFractionDigits:0})}</div><div class="pkg-stat-lbl">Value used</div></div>
+        <div class="pkg-stat"><div class="pkg-stat-val">฿${(remainHours*Number(costPerHour)).toLocaleString(undefined,{maximumFractionDigits:0})}</div><div class="pkg-stat-lbl">Value left</div></div>
+      </div>
+    </div>
+    <div class="pkg-card">
+      <div class="pkg-card-title">Package settings</div>
+      <div class="pkg-settings">
+        <div class="pkg-settings-title">Adjust package</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+          <div class="form-row"><label>Total hours</label><input type="number" id="pkg-hours" value="${totalHours}" min="1"></div>
+          <div class="form-row"><label>Cost (฿)</label><input type="number" id="pkg-cost" value="${cost}" min="0"></div>
+        </div>
+        <div class="form-row" style="margin-bottom:10px;"><label>Package start date</label><input type="date" id="pkg-start" value="${pkg.startDate||today()}"></div>
+        <button class="btn-sm" style="width:100%" onclick="savePackageSettings()">Save settings</button>
+      </div>
+    </div>
+    <div class="pkg-card">
+      <div class="pkg-card-title">Add hours manually</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">For classes not tracked above (e.g. makeup classes, extra sessions)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div class="form-row"><label>Hours</label><input type="number" id="manual-hours" placeholder="e.g. 1.5" min="0" step="0.5"></div>
+        <div class="form-row"><label>Date</label><input type="date" id="manual-date" value="${today()}"></div>
+      </div>
+      <div class="form-row" style="margin-bottom:10px;"><label>Label (optional)</label><input type="text" id="manual-label" placeholder="e.g. Extra session"></div>
+      <button class="btn-sm" style="width:100%" onclick="addManualEntry()">Add hours</button>
+      ${manualRows?`<div class="history-list" style="margin-top:14px;"><div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;">Manual entries</div>${manualRows}</div>`:''}
+    </div>`;
+}
+
+function savePackageSettings() {
+  state.package.totalHours = Number(document.getElementById('pkg-hours').value)||20;
+  state.package.costPerPackage = Number(document.getElementById('pkg-cost').value)||9000;
+  state.package.startDate = document.getElementById('pkg-start').value||today();
+  saveState(); render();
+}
+
+function addManualEntry() {
+  const hours = parseFloat(document.getElementById('manual-hours').value);
+  const date = document.getElementById('manual-date').value;
+  const label = document.getElementById('manual-label').value.trim();
+  if (!hours||hours<=0) { alert('Please enter a valid number of hours.'); return; }
+  if (!state.package.manualEntries) state.package.manualEntries = [];
+  state.package.manualEntries.push({hours,date,label});
+  saveState(); render();
+}
+
+function deleteManualEntry(idx) {
+  if (!confirm('Remove this entry?')) return;
+  state.package.manualEntries.splice(idx,1); saveState(); render();
+}
+
+function render() { renderStats(); renderCalendar(); renderClasses(); renderPayments(); renderPackage(); }
+
+function openAddClass(dateStr) {
+  editClassIdx = null;
+  document.getElementById('modal-class-title').textContent = 'Add class';
+  document.getElementById('cl-date').value = dateStr||today();
+  document.getElementById('cl-time').value = '10:00';
+  document.getElementById('cl-duration').value = '60';
+  document.getElementById('cl-topic').value = '';
+  document.getElementById('cl-status').value = 'scheduled';
+  document.getElementById('cl-notes').value = '';
+  document.getElementById('modal-class').classList.remove('hidden');
+}
+
+function editClass(idx) {
+  editClassIdx = idx;
+  const c = state.classes[idx];
+  document.getElementById('modal-class-title').textContent = 'Edit class';
+  document.getElementById('cl-date').value = c.date;
+  document.getElementById('cl-time').value = c.time||'';
+  document.getElementById('cl-duration').value = c.duration||60;
+  document.getElementById('cl-topic').value = c.topic||'';
+  document.getElementById('cl-status').value = c.status;
+  document.getElementById('cl-notes').value = c.notes||'';
+  document.getElementById('modal-class').classList.remove('hidden');
+}
+
+function saveClass() {
+  const obj = { date: document.getElementById('cl-date').value, time: document.getElementById('cl-time').value, duration: document.getElementById('cl-duration').value, topic: document.getElementById('cl-topic').value.trim(), status: document.getElementById('cl-status').value, notes: document.getElementById('cl-notes').value.trim() };
+  if (!obj.date) { alert('Please pick a date.'); return; }
+  if (editClassIdx!==null) state.classes[editClassIdx]=obj; else state.classes.push(obj);
+  saveState(); closeModals(); render();
+}
+
+function deleteClass(idx) { if (!confirm('Delete this class?')) return; state.classes.splice(idx,1); saveState(); render(); }
+
+function openAddPayment() {
+  document.getElementById('pay-date').value = today();
+  document.getElementById('pay-amount').value = '';
+  document.getElementById('pay-desc').value = '';
+  document.getElementById('pay-status').value = 'paid';
+  document.getElementById('modal-payment').classList.remove('hidden');
+}
+
+function savePayment() {
+  const obj = { date: document.getElementById('pay-date').value, amount: document.getElementById('pay-amount').value, desc: document.getElementById('pay-desc').value.trim(), status: document.getElementById('pay-status').value };
+  if (!obj.date||!obj.amount) { alert('Please fill in date and amount.'); return; }
+  state.payments.push(obj); saveState(); closeModals(); render();
+}
+
+function deletePayment(idx) { if (!confirm('Delete this payment?')) return; state.payments.splice(idx,1); saveState(); render(); }
+function closeModals() { document.getElementById('modal-class').classList.add('hidden'); document.getElementById('modal-payment').classList.add('hidden'); }
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) closeModals(); }));
+
+loadState(); render();
+</script>
+</body>
+</html>
